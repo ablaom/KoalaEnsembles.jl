@@ -13,7 +13,7 @@ import DataFrames: AbstractDataFrame
 
 # to be extended (but not explicitly rexported):
 import Koala: setup, fit, predict
-import Koala: get_metadata, get_scheme_X, get_scheme_y, transform, inverse_transform
+import Koala: get_scheme_X, get_scheme_y, transform, inverse_transform
 
 # development only:
 # import ADBUtilities: @dbg, @colon
@@ -104,10 +104,6 @@ function Base.show(stream::IO, object::EnsembleRegressor)
                          "@", abbreviated(hash(object))))
 end
 
-
-get_metadata(model::EnsembleRegressor, X::AbstractDataFrame, y, rows, features) =
-    get_metadata(model.atom, X, y, rows, features) 
-
 get_scheme_X(model::EnsembleRegressor, X::AbstractDataFrame, train_rows, features) =
     get_scheme_X(model.atom, X, train_rows, features)
 
@@ -124,9 +120,9 @@ inverse_transform(model::EnsembleRegressor, scheme_y, yt) =
     inverse_transform(model.atom, scheme_y, yt)
 
 function setup(model::EnsembleRegressor{P, Atom},
-               Xt, yt, metadata, parallel, verbosity) where {P, Atom<:Regressor{P}}
+               Xt, yt, scheme_X, parallel, verbosity) where {P, Atom<:Regressor{P}}
     ensemble = Array{P}(0)
-    return Xt, yt, metadata, ensemble
+    return Xt, yt, scheme_X, ensemble
 end
 
 # Note: Whenceforth I use "X" and "y" instead of "Xt" and "yt"
@@ -135,7 +131,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
              verbosity; optimize_weights_only=false) where {P,
              Atom<:Regressor{P}}
 
-    X, y, metadata, ensemble_so_far = cache
+    X, y, scheme_X, ensemble_so_far = cache
     n = model.n
     nbr_so_far = length(ensemble_so_far)
     n_patterns = length(y)
@@ -152,7 +148,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         for i in 1:n
             verbosity < 1 || print("\rComputing regressor number: $(i + nbr_so_far)    ")
             train_rows = StatsBase.sample(1:n_patterns, n_train, replace=false)
-            atom_cache = setup(model.atom, X, y, metadata, parallel, verbosity - 1)
+            atom_cache = setup(model.atom, X, y, scheme_X, parallel, verbosity - 1)
             atom_predictor, atom_report, atom_cache =
                 fit(model.atom, atom_cache, false, false, verbosity - 1)
             ensemble[i] = atom_predictor
@@ -249,7 +245,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
     report = Dict{Symbol, Any}()
     report[:normalized_weights] = weights*length(weights)
 
-    cache = (X, y, metadata, ensemble)
+    cache = (X, y, scheme_X, ensemble)
         
     return predictor, report, cache
 
