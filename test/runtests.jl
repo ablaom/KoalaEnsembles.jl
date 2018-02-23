@@ -4,16 +4,19 @@ using Base.Test
 
 const X, y = load_ames();
 const train, test = splitrows(1:length(y), 0.8);
-const model = EnsembleRegressor()
-model.atom.max_features = 4
-mach = SupervisedMachine(model, X, y, train)
-fit!(mach, train)
-model.weight_regularization = 0.5
-fit_weights!(mach)
-err(mach, test)
-fit!(mach, train, add=true)
-err(mach, test)
-u,v = weight_regularization_curve(mach, test, raw=false, range=linspace(0,1,21))
-model.weight_regularization = u[indmax(v)]
-fit_weights!(mach)
-err(mach, test)
+const forest = EnsembleRegressor()
+showall(forest)
+tree = forest.atom
+tree.max_features = 4
+forestM = Machine(forest, X, y, train)
+showall(forestM)
+fit!(forestM, train)
+forest.weight_regularization = 0.5
+fit_weights!(forestM)
+err(forestM, test)
+fit!(forestM, train, add=true)
+err(forestM, test)
+u,v = weight_regularization_curve(forestM, test, raw=false, range=linspace(0,1,21))
+forest.weight_regularization = u[indmin(v)]
+fit_weights!(forestM)
+err(forestM, test)

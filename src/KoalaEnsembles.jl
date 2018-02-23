@@ -13,13 +13,14 @@ import DataFrames: AbstractDataFrame
 
 # to be extended (but not explicitly rexported):
 import Koala: setup, fit, predict
-import Koala: get_scheme_X, get_scheme_y, transform, inverse_transform
+import Koala: get_transformer_X, get_transformer_y, transform, inverse_transform
 
 # development only:
 # import ADBUtilities: @dbg, @colon
 
 # constants:
 const EPS = eps(Float64)
+
 
 ## Weighted ensembles of predictors
 
@@ -104,20 +105,9 @@ function Base.show(stream::IO, object::EnsembleRegressor)
                          "@", abbreviated(hash(object))))
 end
 
-get_scheme_X(model::EnsembleRegressor, X::AbstractDataFrame, train_rows, features) =
-    get_scheme_X(model.atom, X, train_rows, features)
-
-transform(model::EnsembleRegressor, scheme_X, X::AbstractDataFrame) =
-    transform(model.atom, scheme_X, X)
-
-get_scheme_y(model::EnsembleRegressor, y, train_rows) =
-    get_scheme_y(model.atom, y, train_rows)
-
-transform(model::EnsembleRegressor, scheme_y, y::AbstractVector{T} where T<:Real) =
-    transform(model.atom, scheme_y, y)
-
-inverse_transform(model::EnsembleRegressor, scheme_y, yt) =
-    inverse_transform(model.atom, scheme_y, yt)
+# transformers are inherited from atom:
+get_transformer_X(model::EnsembleRegressor) = get_transformer_X(model.atom)
+get_transformer_y(model::EnsembleRegressor) = get_transformer_y(model.atom)
 
 function setup(model::EnsembleRegressor{P, Atom},
                Xt, yt, scheme_X, parallel, verbosity) where {P, Atom<:Regressor{P}}
@@ -296,6 +286,7 @@ function weight_regularization_curve(mach::SupervisedMachine{WeightedEnsemble{P,
             fit_weights!(mach; parallel= parallel, verbosity=verbosity - 1)
             push!(errors, err(mach, test_rows, raw=raw))
         end
+        verbosity < 1 || println()
         
         mach.report[:weight_regularization_curve] = (range, errors)
     end
