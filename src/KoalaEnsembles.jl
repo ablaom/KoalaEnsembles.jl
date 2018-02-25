@@ -128,7 +128,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
     n_train = round(Int, floor(model.bagging_fraction*n_patterns))
 
     # core ensemble building function:
-    function get_ensemble(n, verbosity)
+    function get_ensemble(n, verbosity::Int)
 
         # initialize random number generator:
         srand((round(Int,time()*1000000)))
@@ -138,7 +138,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         for i in 1:n
             verbosity < 1 || print("\rComputing regressor number: $(i + nbr_so_far)    ")
             train_rows = StatsBase.sample(1:n_patterns, n_train, replace=false)
-            atom_cache = setup(model.atom, X, y, scheme_X, parallel, verbosity - 1)
+            atom_cache = setup(model.atom, X, y, scheme_X, false, verbosity - 1)
             atom_predictor, atom_report, atom_cache =
                 fit(model.atom, atom_cache, false, false, verbosity - 1)
             ensemble[i] = atom_predictor
@@ -156,7 +156,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         ensemble = ensemble_so_far
     else # build required
         if !parallel || nworkers() == 1 # build in serial
-            ensemble = get_ensemble(n, parallel)
+            ensemble = get_ensemble(n, verbosity - 1)
         else # build in parallel
             if verbosity >= 1
                 println("Ensemble-building in parallel on $(nworkers()) processors.")
@@ -165,15 +165,15 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
             left_over = mod(n, nworkers())
             ensemble =  @parallel (vcat) for i = 1:nworkers()
                 if i != nworkers()
-                    get_ensemble(chunk_size, false) # false means silent
+                    get_ensemble(chunk_size, 0) # 0 means silent
                 else
-                    get_ensemble(chunk_size + left_over, false) 
+                    get_ensemble(chunk_size + left_over, 0) 
                 end
             end
-            # include an existing ensemble if required:
-            if add
-                ensemble = vcat(ensemble_so_far, ensemble)
-            end 
+        end
+        # include an existing ensemble if required:
+        if add
+            ensemble = vcat(ensemble_so_far, ensemble)
         end 
     end
 
