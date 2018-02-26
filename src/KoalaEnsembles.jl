@@ -13,7 +13,7 @@ import DataFrames: AbstractDataFrame
 
 # to be extended (but not explicitly rexported):
 import Koala: setup, fit, predict
-import Koala: get_transformer_X, get_transformer_y, transform, inverse_transform
+import Koala: default_transformer_X, default_transformer_y, transform, inverse_transform
 
 # development only:
 # import ADBUtilities: @dbg, @colon
@@ -106,8 +106,8 @@ function Base.show(stream::IO, object::EnsembleRegressor)
 end
 
 # transformers are inherited from atom:
-get_transformer_X(model::EnsembleRegressor) = get_transformer_X(model.atom)
-get_transformer_y(model::EnsembleRegressor) = get_transformer_y(model.atom)
+default_transformer_X(model::EnsembleRegressor) = default_transformer_X(model.atom)
+default_transformer_y(model::EnsembleRegressor) = default_transformer_y(model.atom)
 
 function setup(model::EnsembleRegressor{P, Atom},
                Xt, yt, scheme_X, parallel, verbosity) where {P, Atom<:Regressor{P}}

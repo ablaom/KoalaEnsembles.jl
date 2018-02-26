@@ -8,6 +8,7 @@ const forest = EnsembleRegressor()
 showall(forest)
 tree = forest.atom
 tree.max_features = 4
+forest.n = 50
 forestM = Machine(forest, X, y, train)
 showall(forestM)
 fit!(forestM, train)
@@ -19,4 +20,7 @@ err(forestM, test)
 u,v = weight_regularization_curve(forestM, test, raw=false, range=linspace(0,1,21))
 forest.weight_regularization = u[indmin(v)]
 fit_weights!(forestM)
+err(forestM, test)
+forest.n = 200
+fit!(forestM, train)
 err(forestM, test)
