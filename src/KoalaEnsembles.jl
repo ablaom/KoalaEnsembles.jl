@@ -194,7 +194,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
 
         # If I rescale all predictions by the same amount it makes no
         # difference to the values of the optimal weights:
-        ybar = mean(y)
+        ybar = mean(abs.(y))
         Y = Y/ybar
         
         A = Y*Y'

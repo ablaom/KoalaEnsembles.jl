@@ -3,7 +3,7 @@ using KoalaEnsembles
 using Base.Test
 
 const X, y = load_ames();
-const train, test = splitrows(1:length(y), 0.8);
+const train, test = split(1:length(y), 0.8);
 const forest = EnsembleRegressor()
 showall(forest)
 tree = forest.atom
