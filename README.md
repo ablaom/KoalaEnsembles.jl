@@ -52,10 +52,10 @@ dropped altogether.
     julia> forest.atom.max_features = 4
     julia> forestM = Machine(forest, X, y, train)
     SupervisedMachine{EnsembleRegressor,}@...968
-
+	
 	julia> fit!(forestM, test)
-	Computing regressor number: 20    
-	SupervisedMachine{EnsembleRegressor,}@...968
+    Computing regressor number: 20    
+    SupervisedMachine{EnsembleRegressor,}@...968
 
     julia> forestM.report
     Dict{Symbol,Any} with 1 entry:
