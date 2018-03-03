@@ -49,7 +49,7 @@ dropped altogether.
 ````julia 
     julia> const X, y = load_ames(); 
     julia> train, test = split(1:length(y), 0.8); # 80:20 split 
-	julia> forest.atom.max_features = 4
+    julia> forest.atom.max_features = 4
     julia> forestM = Machine(forest, X, y, train)
     SupervisedMachine{EnsembleRegressor,}@...968
 
@@ -58,7 +58,7 @@ dropped altogether.
 	SupervisedMachine{EnsembleRegressor,}@...968
 
     julia> forestM.report
-	Dict{Symbol,Any} with 1 entry:
+    Dict{Symbol,Any} with 1 entry:
     :normalized_weights => [0.05, 0.05, 0.05, 0.05,…
 ````
 
@@ -73,7 +73,7 @@ changing the ensemble itself, use ``fit_weights``:
     SupervisedMachine{EnsembleRegressor,}@...968
 
     julia> forestM.report
-	Dict{Symbol,Any} with 1 entry:
+    Dict{Symbol,Any} with 1 entry:
     :normalized_weights => [1.0196, 0.640301, -0.265808,…
 ````
 
@@ -82,7 +82,7 @@ the help of the `weight_regularization_curve` function:
 
 ````julia
     julia> weights, errors = weight_regularization_curve(forestM, test; range = linspace(0,1,51));
-	julia> using Plots; plot(weights, errors)
+    julia> opt_weight = weights[indmin(errors)]
 ````
 
 
