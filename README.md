@@ -1,6 +1,6 @@
 # KoalaEnsembles
 
-For building and training ensembles of `Koala` models.
+For building and training ensembles of `Koala` supervised learning models.
 
 ````julia
     julia> using Koala
@@ -48,7 +48,7 @@ dropped altogether.
 
 ````julia 
     julia> const X, y = load_ames(); 
-    julia> train, test = splitrows(1:length(y), 0.8); # 80:20 split 
+    julia> train, test = split(1:length(y), 0.8); # 80:20 split 
 	julia> forest.atom.max_features = 4
     julia> forestM = Machine(forest, X, y, train)
     SupervisedMachine{EnsembleRegressor,}@...968

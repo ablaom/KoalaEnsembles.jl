@@ -262,11 +262,12 @@ function weight_regularization_curve(mach::SupervisedMachine{WeightedEnsemble{P,
                                                            EnsembleRegressor{P, Atom}},
                                    test_rows;
                                    verbosity=1, parallel=true, range=linspace(0,1,101),
-                                   raw=true) where {P, Atom <: Regressor{P}}
+                                   raw=false) where {P, Atom <: Regressor{P}}
 
     mach.n_iter > 0 || error("No regressors in the ensemble. Run `fit!` first.")
-    !raw || warn("Reporting errors for *transformed* target. Use `raw=false` "*
-                 " to report true errors.")
+    !raw || verbosity < 0 ||
+        warn("Reporting errors for *transformed* target. Use `raw=false` "*
+             " to report true errors.")
 
     if parallel && nworkers() > 1
         if verbosity >= 1
