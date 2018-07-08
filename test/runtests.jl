@@ -1,5 +1,6 @@
 using Koala
 using KoalaEnsembles
+import UnicodePlots
 using Base.Test
 
 const X, y = load_ames();
@@ -18,6 +19,7 @@ err(forestM, test)
 fit!(forestM, train, add=true)
 err(forestM, test)
 u,v = weight_regularization_curve(forestM, test, raw=false, range=linspace(0,1,21))
+UnicodePlots.lineplot(u,v)
 forest.weight_regularization = u[indmin(v)]
 fit_weights!(forestM)
 err(forestM, test)

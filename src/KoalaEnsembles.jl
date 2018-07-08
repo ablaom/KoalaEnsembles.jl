@@ -136,14 +136,14 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         ensemble = Vector{P}(n)
     
         for i in 1:n
-            verbosity < 1 || print("\rComputing regressor number: $(i + nbr_so_far)    ")
+            verbosity < 1 || info("\rComputing regressor number: $(i + nbr_so_far)    ")
             train_rows = StatsBase.sample(1:n_patterns, n_train, replace=false)
             atom_cache = setup(model.atom, X, y, scheme_X, false, verbosity - 1)
             atom_predictor, atom_report, atom_cache =
                 fit(model.atom, atom_cache, false, false, verbosity - 1)
             ensemble[i] = atom_predictor
         end
-        verbosity < 1 || println()
+        verbosity < 1 || info()
 
         return ensemble
         
@@ -184,7 +184,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
     
     if model.weight_regularization == 1
         weights = ones(n)/n
-        verbosity < 1 || println("Weighting regressors uniformly.")
+        verbosity < 1 || info("Weighting regressors uniformly.")
     else
         verbosity < 1 || print("\nOptimizing weights...")
         Y = Array{Float64}(n, n_patterns)
@@ -204,7 +204,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
 
         if scale < EPS
 
-            warn("Weight optimization problem ill-conditioned. " *
+            verbosity < 0 || warn("Weight optimization problem ill-conditioned. " *
                  "Using uniform weights.")
             weights = ones(n)/n
 
