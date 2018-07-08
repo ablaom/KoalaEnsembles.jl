@@ -136,7 +136,8 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         ensemble = Vector{P}(n)
     
         for i in 1:n
-            verbosity < 1 || info("\rComputing regressor number: $(i + nbr_so_far)    ")
+            N = add ? i + nbr_so_far : i
+            verbosity < 1 || info("\rComputing regressor number: $N          ")
             train_rows = StatsBase.sample(1:n_patterns, n_train, replace=false)
             atom_cache = setup(model.atom, X, y, scheme_X, false, verbosity - 1)
             atom_predictor, atom_report, atom_cache =
