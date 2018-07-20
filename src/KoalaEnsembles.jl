@@ -137,14 +137,14 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
     
         for i in 1:n
             N = add ? i + nbr_so_far : i
-            verbosity < 1 || info("\rComputing regressor number: $N          ")
+            verbosity < 1 || print("\rComputing regressor number: $N          ")
             train_rows = StatsBase.sample(1:n_patterns, n_train, replace=false)
             atom_cache = setup(model.atom, X, y, scheme_X, false, verbosity - 1)
             atom_predictor, atom_report, atom_cache =
                 fit(model.atom, atom_cache, false, false, verbosity - 1)
             ensemble[i] = atom_predictor
         end
-        verbosity < 1 || info()
+        verbosity < 1 || println()
 
         return ensemble
         
@@ -157,7 +157,7 @@ function fit(model::EnsembleRegressor{P, Atom}, cache, add, parallel,
         ensemble = ensemble_so_far
     else # build required
         if !parallel || nworkers() == 1 # build in serial
-            ensemble = get_ensemble(n, verbosity - 1)
+            ensemble = get_ensemble(n, verbosity)
         else # build in parallel
             if verbosity >= 1
                 println("Ensemble-building in parallel on $(nworkers()) processors.")
