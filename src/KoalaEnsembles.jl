@@ -6,7 +6,7 @@ export EnsembleRegressor, fit_weights!, weight_regularization_curve
 
 # for use in this module:
 import Koala: Regressor, BaseType, SupervisedMachine, type_parameters, params
-import Koala: err
+import Koala: err, supports_ensembling, softwarn
 import KoalaTrees: TreeRegressor
 import StatsBase
 import DataFrames: AbstractDataFrame
@@ -68,17 +68,28 @@ mutable struct EnsembleRegressor{P, Atom <: Regressor{P}} <: Regressor{WeightedE
     bagging_fraction::Float64
     n::Int # number of predictors created (added) in call to fit (with add=true)
 
-    function EnsembleRegressor{P, Atom}(atom::Atom, weight_regularization,
-                     bagging_fraction, n::Int) where {P, Atom <: Regressor{P}}
-        if bagging_fraction > 1 ||  bagging_fraction <= 0
-            error("`bagging_fraction` should be in the range (0,1].")
-        end
-        if weight_regularization > 1 || weight_regularization < 0
-            error("`weight_regularization` should be in the range [0,1].")
-        end
-        return new(atom, weight_regularization, bagging_fraction, n)
-    end
 end
+
+function clean!(model::EnsembleRegressor)
+    message = ""
+    if model.bagging_fraction > 1 || model.bagging_fraction <= 0
+        message = message*"`bagging_fraction` should be "*
+        "in the range (0,1]. Reset to 1. "
+        model.bagging_fraction = 1.0
+    end
+    if model.weight_regularization > 1 || model.weight_regularization < 0
+        message = message*"`weight_regularization` should be "*
+        "in the range [0,1]. Reset to 1. "
+        model.weight_regularization = 1.0
+    end
+    if !supports_ensembling(model.atom)
+        message = message*"Ensembling not supported for given `atom`. "*
+        "Resetting to `TreeRegressor()`"
+        model.atom = TreeRegressor()
+    end
+    return message
+end
+
 
 # constructor to infer type automatically:
 EnsembleRegressor(atom::Atom, weight_regularization,
@@ -86,11 +97,13 @@ EnsembleRegressor(atom::Atom, weight_regularization,
                       EnsembleRegressor{P, Atom}(atom, weight_regularization, bagging_fraction, n)
 
 # lazy keyword constructor:
-EnsembleRegressor(;atom=TreeRegressor(),
-                  weight_regularization=1,
-                  bagging_fraction=0.8,
-                  n::Int=100) =
-                      EnsembleRegressor(atom, weight_regularization, bagging_fraction, n)
+function EnsembleRegressor(;atom=TreeRegressor(), weight_regularization=1,
+    bagging_fraction=0.8, n::Int=100)
+    
+    model = EnsembleRegressor(atom, weight_regularization, bagging_fraction, n)
+    softwarn(clean!(model))
+    return model
+end
 
 function Base.show(stream::IO, object::EnsembleRegressor)
     abbreviated(n) = "..."*string(n)[end-2:end]
