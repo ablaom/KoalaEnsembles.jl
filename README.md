@@ -1,7 +1,8 @@
 # KoalaEnsembles
 
-For building and training ensembles of supervised learning models in
-the [Koala](https://github.com/ablaom/Koala.jl) machine learning
+For building and training ensembles of supervised learning models
+(e.g., random forests) in the
+[Koala](https://github.com/ablaom/Koala.jl) machine learning
 environment.
 
 ### Basic usage
